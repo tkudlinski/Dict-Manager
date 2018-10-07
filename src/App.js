@@ -1,26 +1,27 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+// @flow
 
-class App extends Component {
+import React, { Component } from "react";
+import { Navbar, NavbarBrand } from "reactstrap";
+
+import Providux from "./utils/Providux";
+import DictList from "./containers/DictList";
+
+import "./App.css";
+
+type PropType = {};
+type StateType = {};
+
+class App extends Component<PropType, StateType> {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Providux>
+        <div className="App">
+          <Navbar color="light" light expand="md">
+            <NavbarBrand href="/">Dict Manager</NavbarBrand>
+          </Navbar>
+          <DictList />
+        </div>
+      </Providux>
     );
   }
 }

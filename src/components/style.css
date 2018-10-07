@@ -1,0 +1,30 @@
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.dictItem {
+    cursor: pointer;
+}
+
+.dictItem_remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.rowItem_badge {
+    margin-right: 3px;
+}
+
+.rowItem_errors {
+    margin-bottom: auto;
+}
+
+.rowItem_btn {
+    margin-right: 5px;
+    width: 75px;
+}
+
+.rowItem_input {
+    text-align: center;
+}
