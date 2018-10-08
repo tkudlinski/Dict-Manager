@@ -20,9 +20,18 @@ const initialState: CoreStateType = {
     ...dictionariesFromLocalStorage,
     // eslint-disable-next-line
     ["Dictionary [Example]"]: {
-      Stonegrey1: "Dark Grey",
-      Stonegrey2: "Dark Grey2",
-      Caribbean: "Sea Turqoise"
+      a: {
+        domain: "Stonegrey1",
+        range: "Dark Grey"
+      },
+      b: {
+        domain: "Stonegrey2",
+        range: "Dark Grey2"
+      },
+      c: {
+        domain: "Caribbean",
+        range: "Sea Turqoise"
+      }
     }
   }
 };

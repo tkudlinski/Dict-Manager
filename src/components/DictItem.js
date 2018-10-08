@@ -1,15 +1,21 @@
 // @flow
 
 import * as React from "react";
-
 import { Alert, Button, Table } from "reactstrap";
+import uuid from "uuid/v4";
 
 import { ActionsConsumer } from "../utils/context";
 import RowItem from "./RowItem";
 import RowItemToAdd from "./RowItemToAdd";
-import type { DictionaryType, ErrorsType } from "../utils/types";
+import type {
+  DomainIdType,
+  DictionaryType,
+  DictionaryIdType,
+  ErrorsType
+} from "../utils/types";
 import {
   hasDuplicatedDomainsRanges,
+  hasForks,
   hasCycles,
   hasChain
 } from "../utils/validation";
@@ -17,9 +23,9 @@ import {
 import "./style.css";
 
 type PropsType = {
-  dictId: string,
+  dictId: DictionaryIdType,
   dict: DictionaryType,
-  updateDict: (dictId: string, dict: DictionaryType) => void
+  updateDict: (dictId: DictionaryIdType, dict: DictionaryType) => void
 };
 type StateType = { expanded: boolean };
 
@@ -45,9 +51,14 @@ export default class DictItem extends React.Component<PropsType, StateType> {
       errors.duplication = duplication;
     }
 
+    const forks = hasForks(dict);
+    if (forks) {
+      errors.forks = forks;
+    }
+
     const cycles = hasCycles(dict);
     if (cycles) {
-      errors.cycles = [cycles];
+      errors.cycles = cycles;
     }
 
     const chains = hasChain(dict);
@@ -66,38 +77,22 @@ export default class DictItem extends React.Component<PropsType, StateType> {
     }));
   };
   _updateDomainAndRange = (
-    oldDomain: string | null,
+    domainId: string,
     newDomain: string | null,
     newRange: string | null
   ) => {
     const { dict: oldDict, dictId, updateDict } = this.props;
-    if (oldDomain === null) {
-      if (newDomain === null) {
-        return;
+    updateDict(dictId, {
+      ...oldDict,
+      [domainId]: {
+        domain: newDomain === null ? oldDict[domainId].domain : newDomain,
+        range: newRange === null ? oldDict[domainId].range : newRange
       }
-      updateDict(dictId, {
-        ...oldDict,
-        [newDomain]: newRange
-      });
-      return;
-    }
-
-    if (newDomain !== null) {
-      const dict = { ...oldDict };
-      const value = newRange === null ? oldDict[oldDomain] : newRange;
-      delete dict[oldDomain];
-      dict[newDomain] = value;
-      updateDict(dictId, dict);
-    } else if (newRange !== null) {
-      updateDict(dictId, {
-        ...oldDict,
-        [oldDomain]: newRange
-      });
-    }
+    });
   };
   render() {
     const { dictId, dict } = this.props;
-    const sortedDomains = Object.keys(dict).sort();
+    const domainIds = Object.keys(dict);
     const items = this.state.expanded ? (
       <Table>
         <thead>
@@ -109,12 +104,13 @@ export default class DictItem extends React.Component<PropsType, StateType> {
           </tr>
         </thead>
         <tbody>
-          {sortedDomains.map((domain, index) => (
+          {domainIds.map((domainId: DomainIdType, index: number) => (
             <RowItem
-              key={`DictItem-${domain}`}
+              key={`DictItem-${domainId}`}
               index={index}
-              domain={domain}
-              range={dict[domain]}
+              domainId={domainId}
+              domain={dict[domainId].domain}
+              range={dict[domainId].range}
               errors={this._getErrors()}
               updateDomainAndRange={this._updateDomainAndRange}
               deleteDomain={this._deleteDomain}
@@ -122,7 +118,8 @@ export default class DictItem extends React.Component<PropsType, StateType> {
           ))}
           <RowItemToAdd
             key={`DictItem-${""}`}
-            index={sortedDomains.length + 1}
+            index={domainIds.length + 1}
+            domainId={uuid()}
             domain={null}
             range={null}
             errors={null}
@@ -135,7 +132,7 @@ export default class DictItem extends React.Component<PropsType, StateType> {
     return (
       <React.Fragment>
         <Alert className="dictItem" onClick={this._toogleDict} color="dark">
-          {this.props.dictId}
+          {dictId}
           <ActionsConsumer>
             {({ removeDict }) => {
               return (

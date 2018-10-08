@@ -1,41 +1,66 @@
 // @flow
 
-import type { DictionaryType } from "./types";
+import type { DictionaryType, DomainIdType } from "./types";
 
 export const hasDuplicatedDomainsRanges = (
   dict: DictionaryType
-): Array<string> | null => {
+): Array<DomainIdType> | null => {
   const duplicationInDomain = [];
-  const domains = Object.keys(dict);
-  domains.forEach((domain: string, domainIndex: number) => {
+  const domainIds: Array<DomainIdType> = Object.keys(dict);
+  domainIds.forEach((domainId: DomainIdType) => {
     if (
-      domains.some(
-        (domain2: string, domain2Index: number) =>
-          domainIndex !== domain2Index && dict[domain] === dict[domain2]
+      domainIds.some(
+        (domainId2: string) =>
+          domainId !== domainId2 &&
+          dict[domainId].range === dict[domainId2].range
       )
     ) {
-      duplicationInDomain.push(domain);
+      duplicationInDomain.push(domainId);
     }
   });
   return duplicationInDomain.length !== 0 ? duplicationInDomain : null;
 };
 
+export const hasForks = (dict: DictionaryType): Array<DomainIdType> | null => {
+  const domainIds = Object.keys(dict);
+  const forkInDomain = [];
+
+  domainIds.forEach((domainId: DomainIdType) => {
+    if (
+      domainIds.some(
+        (domainId2: DomainIdType) =>
+          domainId !== domainId2 &&
+          dict[domainId].domain === dict[domainId2].domain &&
+          dict[domainId].range !== dict[domainId2].range
+      )
+    ) {
+      forkInDomain.push(domainId);
+    }
+  });
+
+  return forkInDomain.length !== 0 ? forkInDomain : null;
+};
+
 const findCycle = (
-  initialDomain: string,
-  currentDomain: string,
+  initialDomainId: DomainIdType,
+  currentDomainId: DomainIdType | void,
   dict: DictionaryType,
   maxDeepth: number,
   currentDepth: number
 ) => {
-  const currentRange = dict[currentDomain];
-  if (currentRange === initialDomain) {
+  const currentRange =
+    currentDomainId && dict[currentDomainId] && dict[currentDomainId].range;
+  if (currentRange === dict[initialDomainId].domain) {
     return true;
   } else if (currentRange === undefined || currentDepth >= maxDeepth) {
     return false;
   } else {
     return findCycle(
-      initialDomain,
-      currentRange,
+      initialDomainId,
+      Object.keys(dict).find(
+        (domainId: DomainIdType) =>
+          currentDomainId !== domainId && dict[domainId].domain === currentRange
+      ),
       dict,
       maxDeepth,
       currentDepth + 1
@@ -43,21 +68,26 @@ const findCycle = (
   }
 };
 
-// is providing name of the first domain, which begins cycle
-export const hasCycles = (dict: DictionaryType): string | void => {
-  const domains = Object.keys(dict);
-  return domains.find((domain: string, domainIndex: number) =>
-    findCycle(domain, domain, dict, domains.length, 1)
-  );
+export const hasCycles = (dict: DictionaryType): Array<DomainIdType> | null => {
+  const domainIds = Object.keys(dict);
+  const cycleInDomain = [];
+  domainIds.forEach((domainId: DomainIdType, domainIndex: number) => {
+    if (findCycle(domainId, domainId, dict, domainIds.length, 1)) {
+      cycleInDomain.push(domainId);
+    }
+  });
+  return cycleInDomain.length !== 0 ? cycleInDomain : null;
 };
 
-export const hasChain = (dict: DictionaryType): Array<string> | null => {
-  const domains = Object.keys(dict);
-  const ranges = Object.values(dict);
+export const hasChain = (dict: DictionaryType): Array<DomainIdType> | null => {
+  const domainIds = Object.keys(dict);
+  const ranges = domainIds.map(
+    (domainId: DomainIdType) => dict[domainId].range
+  );
   const chainInDomain = [];
-  domains.forEach(domain => {
-    if (ranges.includes(domain)) {
-      chainInDomain.push(domain);
+  domainIds.forEach((domainId: DomainIdType) => {
+    if (ranges.includes(dict[domainId].domain)) {
+      chainInDomain.push(domainId);
     }
   });
   return chainInDomain.length !== 0 ? chainInDomain : null;

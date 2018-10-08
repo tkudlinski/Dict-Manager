@@ -2,10 +2,19 @@
 
 import * as React from "react";
 
+export type DictionaryItemType = {
+  domain: string,
+  range: string
+};
+
+export type DomainIdType = string;
+
 export type DictionaryType = {};
 
+export type DictionaryIdType = string;
+
 export type CoreStateType = {
-  dictionaries: Object
+  dictionaries: {}
 };
 
 export type CoreActionsType = {
@@ -20,6 +29,7 @@ export type CorePropsType = {
 
 export type ErrorsType = {
   duplication: Array<string>,
+  forks: Array<string>,
   cycles: Array<string>,
   chains: Array<string>
 } | null;

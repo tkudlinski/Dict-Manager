@@ -6,6 +6,8 @@ import { Alert } from "reactstrap";
 import { StateConsumer, ActionsConsumer } from "../utils/context";
 import DictItem from "../components/DictItem";
 
+import type { DictionaryIdType } from "../utils/types";
+
 import "./style.css";
 
 type PropsType = {};
@@ -28,19 +30,21 @@ export default class DictList extends React.Component<PropsType, StateType> {
                 </Alert>
                 <StateConsumer>
                   {({ dictionaries }) => {
-                    return Object.keys(dictionaries).map((dictId: string) => {
-                      if (!dictionaries[dictId]) {
-                        return null;
+                    return Object.keys(dictionaries).map(
+                      (dictId: DictionaryIdType) => {
+                        if (!dictionaries[dictId]) {
+                          return null;
+                        }
+                        return (
+                          <DictItem
+                            updateDict={updateDict}
+                            dict={dictionaries[dictId]}
+                            key={`DictList-${dictId}`}
+                            dictId={dictId}
+                          />
+                        );
                       }
-                      return (
-                        <DictItem
-                          updateDict={updateDict}
-                          dict={dictionaries[dictId]}
-                          key={`DictList-${dictId}`}
-                          dictId={dictId}
-                        />
-                      );
-                    });
+                    );
                   }}
                 </StateConsumer>
               </React.Fragment>

@@ -7,6 +7,7 @@ import localStorage from "localStorage";
 import { STORAGE_KEY } from "./config";
 
 import type {
+  DictionaryIdType,
   CorePropsType,
   CoreStateType,
   DictionaryType
@@ -28,7 +29,7 @@ export const getActions = (
         () => localStorage.setItem(STORAGE_KEY, JSON.stringify(t.state))
       );
     },
-    updateDict: (dictId: string, dict: DictionaryType) => {
+    updateDict: (dictId: DictionaryIdType, dict: DictionaryType) => {
       t.setState(
         prevState => {
           const updatedDictionaries = {
@@ -43,7 +44,7 @@ export const getActions = (
         () => localStorage.setItem(STORAGE_KEY, JSON.stringify(t.state))
       );
     },
-    removeDict: (dictId: string) => {
+    removeDict: (dictId: DictionaryIdType) => {
       t.setState(
         prevState => {
           const updatedDictionaries = {

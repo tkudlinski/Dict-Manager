@@ -4,18 +4,19 @@ import * as React from "react";
 
 import { Button, Input, Badge } from "reactstrap";
 
-import type { ErrorsType } from "../utils/types";
+import type { DomainIdType, ErrorsType } from "../utils/types";
 
 import "./style.css";
 
 export type PropsType = {
+  domainId: DomainIdType,
   domain: string | null,
   range: string | null,
   index: number,
   errors: ErrorsType,
-  deleteDomain: null | ((domain: string) => void),
+  deleteDomain: null | ((domainId: DomainIdType) => void),
   updateDomainAndRange: (
-    oldDomain: string | null,
+    domainId: DomainIdType,
     newDomain: string | null,
     newRange: string | null
   ) => void
@@ -38,26 +39,30 @@ export default class RowItem extends React.Component<PropsType, StateType> {
   _delete = () =>
     this.props.domain &&
     this.props.deleteDomain &&
-    this.props.deleteDomain(this.props.domain);
+    this.props.deleteDomain(this.props.domainId);
   _getErrors = () => {
-    const { errors, domain } = this.props;
-    if (errors === null || domain === null) {
+    const { errors, domainId } = this.props;
+    if (errors === null) {
       return null;
     }
 
     const jsxErrors = [];
 
-    if (errors.cycles && errors.cycles.includes(domain)) {
+    if (errors.cycles && errors.cycles.includes(domainId)) {
       jsxErrors.push(
-        <Badge key={`Cycle-${domain}`} className="rowItem_badge" color="danger">
+        <Badge
+          key={`Cycle-${domainId}`}
+          className="rowItem_badge"
+          color="danger"
+        >
           Cycle
         </Badge>
       );
     }
-    if (errors.duplication && errors.duplication.includes(domain)) {
+    if (errors.duplication && errors.duplication.includes(domainId)) {
       jsxErrors.push(
         <Badge
-          key={`Duplication-${domain}`}
+          key={`Duplication-${domainId}`}
           className="rowItem_badge"
           color="warning"
         >
@@ -65,14 +70,25 @@ export default class RowItem extends React.Component<PropsType, StateType> {
         </Badge>
       );
     }
-    if (errors.chains && errors.chains.includes(domain)) {
+    if (errors.chains && errors.chains.includes(domainId)) {
       jsxErrors.push(
         <Badge
-          key={`Chain-${domain}`}
+          key={`Chain-${domainId}`}
           className="rowItem_badge"
           color="warning"
         >
           Chain
+        </Badge>
+      );
+    }
+    if (errors.forks && errors.forks.includes(domainId)) {
+      jsxErrors.push(
+        <Badge
+          key={`Fork-${domainId}`}
+          className="rowItem_badge"
+          color="warning"
+        >
+          Fork
         </Badge>
       );
     }
@@ -81,8 +97,8 @@ export default class RowItem extends React.Component<PropsType, StateType> {
   };
   _toggleEditable = () => {
     const { newDomain, newRange } = this.state;
-    const { domain, updateDomainAndRange } = this.props;
-    updateDomainAndRange(domain, newDomain, newRange);
+    const { domainId, updateDomainAndRange } = this.props;
+    updateDomainAndRange(domainId, newDomain, newRange);
     this.setState(prevState => ({
       editable: !prevState.editable,
       newDomain: null,
